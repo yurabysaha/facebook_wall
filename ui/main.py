@@ -7,6 +7,7 @@ import threading
 import db_module
 
 import server
+from scrup import Scrup
 from ui.groups_view import GroupsView
 from ui.users_view import UsersView
 from ui.results_view import ResultsView
@@ -38,6 +39,7 @@ menu_btns = []
 def start_working(event):
     textfield.insert('end', 'Start scraping groups...\n')
     textfield.see('end')
+    Scrup().start_scraping()
 
 
 def open_logging(event):

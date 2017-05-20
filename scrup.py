@@ -1,6 +1,8 @@
+import threading
+
 import facebook
 import requests
-
+import sqlite3 as db
 
 class Scrup:
 
@@ -15,10 +17,10 @@ class Scrup:
             return False
 
     def getAllPostsFromGroup(self, token, group_url):
-        self.graph = facebook.GraphAPI(access_token=token, version='2.3')
+        self.graph = facebook.GraphAPI(access_token=token, version="2.3")
         # Get ID from group Url
         get_group_name = group_url.rstrip('/ ').split('/')[-1]
-        if self._is_number(get_group_name) == True:
+        if self._is_number(get_group_name):
             group_id = get_group_name
         else:
             resposne = self.graph.search(type='group', q=get_group_name)
@@ -67,4 +69,16 @@ class Scrup:
             except KeyError:
                 print "Key Error"
 
+    def start_scraping(self):
+        con = db.connect(database="../db")
+        cur = con.cursor()
+        users = cur.execute("SELECT * FROM users;").fetchall()
 
+        for i in cur.execute("SELECT * FROM groups WHERE scrup=1;"):
+            token = ''
+            for z in users:
+                if i[2] == z[2]:
+                    token = z[3]
+                    break
+            t = threading.Thread(target=self.getAllPostsFromGroup, args=(token, i[1],))
+            t.start()
