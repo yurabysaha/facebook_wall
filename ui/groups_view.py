@@ -62,10 +62,10 @@ class GroupsView:
         self.add_group_btn.bind("<Button-1>", self.add_new_fb_group)
         self.add_group_btn.place(x=240, y=5)
 
-        tk.Label(self.listFrame, text='Link', bg='#e6e6e6').place(x=20, y=80)
-        tk.Label(self.listFrame, text='Owner', bg='#e6e6e6').place(x=150, y=80)
-        tk.Label(self.listFrame, text='Fetch', bg='#e6e6e6').place(x=250, y=80)
-        tk.Label(self.listFrame, text='Options', bg='#e6e6e6').place(x=310, y=80)
+        tk.Label(self.listFrame, text='Link', bg='#e6e6e6', fg='#2c2d30').place(x=20, y=80)
+        tk.Label(self.listFrame, text='Owner', bg='#e6e6e6', fg='#2c2d30').place(x=150, y=80)
+        tk.Label(self.listFrame, text='Fetch', bg='#e6e6e6', fg='#2c2d30').place(x=250, y=80)
+        tk.Label(self.listFrame, text='Options', bg='#e6e6e6', fg='#2c2d30').place(x=310, y=80)
 
         self.y_place = 110
         for i in cur.execute("SELECT * FROM groups;"):
@@ -86,7 +86,7 @@ class GroupsView:
         self.group_list(new_user)
 
     def group_list(self, i):
-        link_url = str(i[1])[0:20]
+        link_url = '..' + str(i[1])[-20:]
         tk.Label(self.listFrame, text=link_url, bg='#e6e6e6').place(x=20, y=self.y_place)
         tk.Label(self.listFrame, text=i[2], bg='#e6e6e6').place(x=150, y=self.y_place)
         if i[3] == 1:

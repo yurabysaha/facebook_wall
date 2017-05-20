@@ -46,16 +46,16 @@ class UsersView:
         self.update_mess_btn.bind("<Button-1>", self.add_new_fb_user)
         self.update_mess_btn.place(x=110, y=5)
 
-        tk.Label(self.listFrame, text='ID', bg='#e6e6e6').place(x=10, y=50)
-        tk.Label(self.listFrame, text='User Name', bg='#e6e6e6').place(x=150, y=50)
-        tk.Label(self.listFrame, text='Fetch', bg='#e6e6e6').place(x=250, y=50)
-        tk.Label(self.listFrame, text='Options', bg='#e6e6e6').place(x=300, y=50)
+        tk.Label(self.listFrame, text='Facebook id', bg='#e6e6e6', fg='#2c2d30').place(x=10, y=50)
+        tk.Label(self.listFrame, text='User Name', bg='#e6e6e6', fg='#2c2d30').place(x=140, y=50)
+        tk.Label(self.listFrame, text='Fetch', bg='#e6e6e6', fg='#2c2d30').place(x=250, y=50)
+        tk.Label(self.listFrame, text='Options', bg='#e6e6e6', fg='#2c2d30').place(x=300, y=50)
 
         con = db.connect(database="../db")
         cur = con.cursor()
         for i in cur.execute("SELECT * FROM users;"):
             tk.Label(self.listFrame, text=str(i[1]), bg='#e6e6e6').place(x=10, y=self.id)
-            tk.Label(self.listFrame, text=i[2], bg='#e6e6e6').place(x=150, y=self.id)
+            tk.Label(self.listFrame, text=i[2], bg='#e6e6e6').place(x=140, y=self.id)
             if i[4] == 1:
                 text = 'Yes'
             else:
