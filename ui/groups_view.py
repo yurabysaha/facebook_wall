@@ -7,7 +7,7 @@ from ttk import Combobox
 import facebook
 import sqlite3 as db
 
-from db_module import add_new_group
+from db_module import add_new_group, update_group_fetch
 
 
 class GroupsView:
@@ -19,7 +19,7 @@ class GroupsView:
 
         self.body.place(x=120, y=0, width=380, height=500)
         canvas = tk.Canvas(self.body, bg='#e6e6e6')
-        self.listFrame = tk.Frame(canvas, width=380, height=1000, bg='#e6e6e6')
+        self.listFrame = tk.Frame(canvas, width=380, height=500, bg='#e6e6e6')
         scrollb = tk.Scrollbar(self.body, orient="vertical", command=canvas.yview)
         scrollb.pack(side='right', fill='y')  # grid scrollbar in master, but
         canvas['yscrollcommand'] = scrollb.set  # attach scrollbar to frameTwo
@@ -86,5 +86,17 @@ class GroupsView:
             text = 'Yes'
         else:
             text = 'No'
-        tk.Label(self.listFrame, text=text, bg='#e6e6e6').place(x=250, y=self.y_place)
+        btn = tk.Button(self.listFrame, text=text, fg='#2a416f', bg='#ffffff',  width=4, borderwidth=1)
+        btn.place(x=250, y=self.y_place)
+        btn.bind("<Button-1>", lambda event, group=i: self.change_fetch(event, group))
         self.y_place += 30
+
+    def change_fetch(self, event, group):
+        if group[3] == 0:
+            update_group_fetch(group[0], True)
+            event.widget.configure(text='Yes')
+            return
+        else:
+            update_group_fetch(group[0], False)
+            event.widget.configure(text='No')
+            return

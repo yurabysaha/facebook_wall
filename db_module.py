@@ -9,7 +9,7 @@ try:
             fb_id VARCHAR,
             name VARCHAR,
             token TEXT,
-            fatch_all BOOLEAN DEFAULT FALSE 
+            scrup_all BOOLEAN DEFAULT 0 
             );
     """)
 except db.DatabaseError, x:
@@ -25,7 +25,7 @@ try:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             link VARCHAR,
             owner VARCHAR,
-            fatch BOOLEAN DEFAULT FALSE 
+            scrup BOOLEAN DEFAULT 0 
             );
     """)
 except db.DatabaseError, x:
@@ -46,5 +46,13 @@ def add_new_group(link, owner):
     cur = con.cursor()
     query = "INSERT INTO groups (link, owner) values (?, ?)"
     cur.execute(query, (link, owner, ))
+    con.commit()
+    con.close()
+
+def update_group_fetch(id, status):
+    con = db.connect(database="../db")
+    cur = con.cursor()
+    query = "UPDATE groups SET scrup=? WHERE id=?"
+    cur.execute(query, (status, id,))
     con.commit()
     con.close()
