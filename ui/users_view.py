@@ -13,6 +13,8 @@ REDIRECT_URL = 'http://localhost:8000/'
 class UsersView:
     def __init__(self, root, frames, textfield):
         self.id = 80
+        self.root = root
+        self.frames = frames
         self.text = textfield
         self.body = tk.Frame(root, bg='#e6e6e6')
         frames['connect'] = self.body
@@ -42,7 +44,7 @@ class UsersView:
                                          width=18, height=2)
 
         self.update_mess_btn.bind("<Button-1>", self.add_new_fb_user)
-        self.update_mess_btn.place(x=110, y=2)
+        self.update_mess_btn.place(x=110, y=5)
 
         tk.Label(self.listFrame, text='ID', bg='#e6e6e6').place(x=10, y=50)
         tk.Label(self.listFrame, text='User Name', bg='#e6e6e6').place(x=150, y=50)
@@ -61,6 +63,11 @@ class UsersView:
             btn = tk.Button(self.listFrame, text=text, fg='#2a416f', bg='#ffffff', width=4, borderwidth=1)
             btn.place(x=250, y=self.id)
             btn.bind("<Button-1>", lambda event, user=i: self.change_fetch(event, user))
+
+            delete_btn = tk.Button(self.listFrame, text='Delete', fg='#2a416f', bg='#ffffff', width=5, borderwidth=1)
+            delete_btn.place(x=310, y=self.id)
+            delete_btn.bind("<Button-1>", lambda event, user=i: self.delete_user(event, user))
+
             self.id += 30
 
     def add_new_fb_user(self, event):
@@ -87,3 +94,13 @@ class UsersView:
             con.close()
             event.widget.config(text='No')
             return
+
+    def delete_user(self, event, user):
+        con = db.connect(database="../db")
+        cur = con.cursor()
+        cur.execute("DELETE FROM users WHERE id=?", (user[0],))
+        con.commit()
+        con.close()
+        for child in self.listFrame.winfo_children():
+            child.destroy()
+        UsersView(self.root, self.frames, self.text)

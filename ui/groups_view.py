@@ -13,8 +13,10 @@ from db_module import add_new_group, update_group_fetch
 class GroupsView:
     def __init__(self, root, frames, textfield):
         self.id = 5
+        self.root = root
+        self.frames = frames
         self.text = textfield
-        self.body = tk.Frame(root, bg='#e6e6e6')
+        self.body = tk.Frame(self.root, bg='#e6e6e6')
         frames['connect'] = self.body
 
         self.body.place(x=120, y=0, width=380, height=500)
@@ -94,6 +96,10 @@ class GroupsView:
         btn = tk.Button(self.listFrame, text=text, fg='#2a416f', bg='#ffffff',  width=4, borderwidth=1)
         btn.place(x=250, y=self.y_place)
         btn.bind("<Button-1>", lambda event, group=i: self.change_fetch(event, group))
+
+        delete_btn = tk.Button(self.listFrame, text='Delete', fg='#2a416f', bg='#ffffff', width=5, borderwidth=1)
+        delete_btn.place(x=310, y=self.y_place)
+        delete_btn.bind("<Button-1>", lambda event, group=i: self.delete_group(event, group))
         self.y_place += 30
 
     def change_fetch(self, event, group):
@@ -108,3 +114,13 @@ class GroupsView:
             update_group_fetch(user[0], False)
             event.widget.config(text='No')
             return
+
+    def delete_group(self, event, group):
+        con = db.connect(database="../db")
+        cur = con.cursor()
+        cur.execute("DELETE FROM groups WHERE id=?", (group[0],))
+        con.commit()
+        con.close()
+        for child in self.listFrame.winfo_children():
+            child.destroy()
+        GroupsView(self.root, self.frames, self.text)
