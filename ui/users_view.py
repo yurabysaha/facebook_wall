@@ -58,7 +58,9 @@ class UsersView:
                 text = 'Yes'
             else:
                 text = 'No'
-            tk.Label(self.listFrame, text=text, bg='#e6e6e6').place(x=250, y=self.id)
+            btn = tk.Button(self.listFrame, text=text, fg='#2a416f', bg='#ffffff', width=4, borderwidth=1)
+            btn.place(x=250, y=self.id)
+            btn.bind("<Button-1>", lambda event, user=i: self.change_fetch(event, user))
             self.id += 30
 
     def add_new_fb_user(self, event):
@@ -66,3 +68,22 @@ class UsersView:
             perms = ['user_friends', 'user_status', 'user_about_me']
             fb_login_url = graph.auth_url(APP_ID, REDIRECT_URL, perms)
             get = webbrowser.open(fb_login_url)
+
+    def change_fetch(self, event, user):
+        con = db.connect(database="../db")
+        cur = con.cursor()
+        user = cur.execute("SELECT * FROM users WHERE id=?", (user[0],)).fetchone()
+        if not user[4]:
+            cur.execute("UPDATE groups SET scrup=1 WHERE owner=?", (user[2],))
+            cur.execute("UPDATE users SET scrup_all=1 WHERE id=?", (user[0],))
+            con.commit()
+            con.close()
+            event.widget.config(text='Yes')
+            return
+        else:
+            cur.execute("UPDATE groups SET scrup=0 WHERE owner=?", (user[2],))
+            cur.execute("UPDATE users SET scrup_all=0 WHERE id=?", (user[0],))
+            con.commit()
+            con.close()
+            event.widget.config(text='No')
+            return
