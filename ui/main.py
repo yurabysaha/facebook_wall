@@ -27,10 +27,17 @@ root.minsize(width=500, height=500)
 
 menu = tk.Frame(root, bg=MAIN_BG)
 body = tk.Frame(root, bg=MAIN_BG)
+
 frames = {'logging': body}
-textfield = tk.Text(body, width=47, height=30, bg='#e6e6e6')
-textfield.place(x=0, y=4)
+textfield = tk.Text(body, width=47, height=27, bg='#e6e6e6')
+textfield.place(x=0, y=2)
+
 menu_btns = []
+
+
+def start_working(event):
+    textfield.insert('end', 'Start scraping groups...\n')
+    textfield.see('end')
 
 
 def open_logging(event):
@@ -65,6 +72,13 @@ def active_menu_btn(event):
     for i in menu_btns:
         i.config(bg='#eeeeee', fg='#000000')
     event.widget.config(bg='#616161', fg='#ffffff')
+
+start_work_btn = tk.Button(body, text='Start Scraping', fg='#ffffff',
+                            bg='#3b5998', activebackground='#3b5998',
+                            borderwidth=0,highlightthickness=0,
+                            width=18, height=2)
+start_work_btn.bind("<Button-1>", start_working)
+start_work_btn.place(x=130, y=450)
 
 
 class Menu:
