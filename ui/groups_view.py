@@ -75,7 +75,12 @@ class GroupsView:
             "Added",
             "New group added successful"
         )
-        new_user = [0, self.input_link.get(), self.combobox.get(), 0]
+        # Get last user for adding to UI
+        con = db.connect(database="../db")
+        cur = con.cursor()
+        cur.execute("SELECT * FROM groups ORDER BY id DESC LIMIT 1")
+        new_user = cur.fetchone()
+
         self.group_list(new_user)
 
     def group_list(self, i):
@@ -92,11 +97,14 @@ class GroupsView:
         self.y_place += 30
 
     def change_fetch(self, event, group):
-        if group[3] == 0:
-            update_group_fetch(group[0], True)
-            event.widget.configure(text='Yes')
+        con = db.connect(database="../db")
+        cur = con.cursor()
+        user = cur.execute("SELECT * FROM groups WHERE id=?", (group[0],)).fetchone()
+        if user[3] == 0:
+            update_group_fetch(user[0], True)
+            event.widget.config(text='Yes')
             return
         else:
-            update_group_fetch(group[0], False)
-            event.widget.configure(text='No')
+            update_group_fetch(user[0], False)
+            event.widget.config(text='No')
             return
