@@ -3,6 +3,7 @@ import threading
 import facebook
 import requests
 import sqlite3 as db
+from db_module import add_new_posts
 
 class Scrup:
 
@@ -17,11 +18,15 @@ class Scrup:
             return False
 
     def getAllPostsFromGroup(self, token, group_url):
-        self.graph = facebook.GraphAPI(access_token=token, version="2.3")
+        self.graph = facebook.GraphAPI(access_token=token, version='2.3')
+        self.my_profile = self.graph.get_object('me')
+        user_id = self.my_profile['id']
+        user_name = self.my_profile['first_name'] + ' ' + self.my_profile['last_name']
         # Get ID from group Url
         get_group_name = group_url.rstrip('/ ').split('/')[-1]
         if self._is_number(get_group_name):
             group_id = get_group_name
+            group_name = self.graph.get_object(group_id)['name']
         else:
             resposne = self.graph.search(type='group', q=get_group_name)
             group_id = resposne['data'][0]['id']
@@ -45,24 +50,41 @@ class Scrup:
                     try:
                         print ('Description: ' + post['description'])
                     except:
+                        post['description'] = ''
                         pass
                     try:
                         print ('Message: ' + post['message'])
                     except:
+                        post['message'] = ''
                         pass
                     try:
                         print ('Picture link:  ' + post['picture'])
                     except:
+                        post['picture'] = ''
                         pass
                     try:
                         print ('Link:  ' + post['link'])
                     except:
+                        post['link'] = ''
                         pass
                     try:
                         print ('Source: :  ' + post['source'])
                     except:
+                        post['source'] = ''
                         pass
+                    try:
+                        print ('Source: :  ' + post['id'])
+                    except:
+                        post['source'] = ''
+                        pass
+                    try:
+                        print ('Source: :  ' + post['story'])
+                    except:
+                        post['story'] = ''
+                        pass
+
                     count_posts += 1
+                    add_new_posts(user_id,user_name,group_id,group_name,post)
                 # Loading to other page
                 data = requests.get(data['paging']['next']).json()
                 # ---------------------
