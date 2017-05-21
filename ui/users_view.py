@@ -21,8 +21,68 @@ class UsersView:
         self.frames = frames
         self.text = textfield
         self.body = tk.Frame(root, bg='#e6e6e6')
-        frames['connect'] = self.body
+        frames['users'] = self.body
 
+        self.display_users_list()
+
+    def add_new_fb_user(self, event):
+            # graph = facebook
+            # perms = ['publish_actions', 'user_managed_groups', 'user_groups']
+            # fb_login_url = graph.auth_url(APP_ID, REDIRECT_URL, perms)
+            # get = webbrowser.open(fb_login_url)
+
+            chrome_options = webdriver.ChromeOptions()
+            prefs = {"profile.default_content_setting_values.notifications": 2}
+            chrome_options.add_experimental_option("prefs", prefs)
+            chrome_options.add_argument('--lang=en')
+            chrome_options.add_argument("start-maximized")
+            self.chrome = webdriver.Chrome(executable_path='../chromedriver.exe', chrome_options=chrome_options)
+            # self.chrome = webdriver.Chrome(executable_path='../chromedriver'.format(os.getcwd()),
+            #                                chrome_options=chrome_options)
+            self.chrome.get('https://www.facebook.com/login/?next=https%3A%2F%2Fdevelopers.facebook.com%2Ftools%2Fexplorer%2F145634995501895%2F')
+            self.chrome.find_element_by_id('email').send_keys(self.login.get())
+            self.chrome.find_element_by_id('pass').send_keys(self.passw.get())
+            self.chrome.find_element_by_id('pass').submit()
+            self.chrome.get('https://developers.facebook.com/tools/explorer/145634995501895/?method=GET&path=me%3F&version=v2.3')
+            token = self.chrome.find_element_by_xpath('//div/div[2]/div/div[1]/label/input').get_attribute('value')
+            self.chrome.close()
+            graph = facebook.GraphAPI(access_token=token, version='2.3')
+            w = graph.get_object('me')
+            add_new_user(token, w, self.login.get(), self.passw.get())
+            for child in self.body.winfo_children():
+                child.destroy()
+            self.display_users_list()
+
+    def change_fetch(self, event, user):
+        con = db.connect(database="../db")
+        cur = con.cursor()
+        user = cur.execute("SELECT * FROM users WHERE id=?", (user[0],)).fetchone()
+        if not user[4]:
+            cur.execute("UPDATE groups SET scrup=1 WHERE owner=?", (user[2],))
+            cur.execute("UPDATE users SET scrup_all=1 WHERE id=?", (user[0],))
+            con.commit()
+            con.close()
+            event.widget.config(text='Yes')
+            return
+        else:
+            cur.execute("UPDATE groups SET scrup=0 WHERE owner=?", (user[2],))
+            cur.execute("UPDATE users SET scrup_all=0 WHERE id=?", (user[0],))
+            con.commit()
+            con.close()
+            event.widget.config(text='No')
+            return
+
+    def delete_user(self, event, user):
+        con = db.connect(database="../db")
+        cur = con.cursor()
+        cur.execute("DELETE FROM users WHERE id=?", (user[0],))
+        con.commit()
+        con.close()
+        for child in self.body.winfo_children():
+            child.destroy()
+        self.display_users_list()
+
+    def display_users_list(self):
         self.body.place(x=120, y=0, width=380, height=500)
         canvas = tk.Canvas(self.body, bg='#e6e6e6')
         self.listFrame = tk.Frame(canvas, width=380, height=500, bg='#e6e6e6')
@@ -81,57 +141,3 @@ class UsersView:
 
             self.id += 30
 
-    def add_new_fb_user(self, event):
-            # graph = facebook
-            # perms = ['publish_actions', 'user_managed_groups', 'user_groups']
-            # fb_login_url = graph.auth_url(APP_ID, REDIRECT_URL, perms)
-            # get = webbrowser.open(fb_login_url)
-
-            chrome_options = webdriver.ChromeOptions()
-            prefs = {"profile.default_content_setting_values.notifications": 2}
-            chrome_options.add_experimental_option("prefs", prefs)
-            chrome_options.add_argument('--lang=en')
-            chrome_options.add_argument("start-maximized")
-            self.chrome = webdriver.Chrome(executable_path='../chromedriver.exe', chrome_options=chrome_options)
-            # self.chrome = webdriver.Chrome(executable_path='../chromedriver'.format(os.getcwd()),
-            #                                chrome_options=chrome_options)
-            self.chrome.get('https://www.facebook.com/login/?next=https%3A%2F%2Fdevelopers.facebook.com%2Ftools%2Fexplorer%2F145634995501895%2F')
-            self.chrome.find_element_by_id('email').send_keys(self.login.get())
-            self.chrome.find_element_by_id('pass').send_keys(self.passw.get())
-            self.chrome.find_element_by_id('pass').submit()
-            self.chrome.get('https://developers.facebook.com/tools/explorer/145634995501895/?method=GET&path=me%3F&version=v2.3')
-            token = self.chrome.find_element_by_xpath('//div/div[2]/div/div[1]/label/input').get_attribute('value')
-            self.chrome.close()
-            graph = facebook.GraphAPI(access_token=token, version='2.3')
-            w = graph.get_object('me')
-            add_new_user(token, w, self.login.get(), self.passw.get())
-            UsersView(self.root, self.frames, self.text)
-
-    def change_fetch(self, event, user):
-        con = db.connect(database="../db")
-        cur = con.cursor()
-        user = cur.execute("SELECT * FROM users WHERE id=?", (user[0],)).fetchone()
-        if not user[4]:
-            cur.execute("UPDATE groups SET scrup=1 WHERE owner=?", (user[2],))
-            cur.execute("UPDATE users SET scrup_all=1 WHERE id=?", (user[0],))
-            con.commit()
-            con.close()
-            event.widget.config(text='Yes')
-            return
-        else:
-            cur.execute("UPDATE groups SET scrup=0 WHERE owner=?", (user[2],))
-            cur.execute("UPDATE users SET scrup_all=0 WHERE id=?", (user[0],))
-            con.commit()
-            con.close()
-            event.widget.config(text='No')
-            return
-
-    def delete_user(self, event, user):
-        con = db.connect(database="../db")
-        cur = con.cursor()
-        cur.execute("DELETE FROM users WHERE id=?", (user[0],))
-        con.commit()
-        con.close()
-        for child in self.listFrame.winfo_children():
-            child.destroy()
-        UsersView(self.root, self.frames, self.text)

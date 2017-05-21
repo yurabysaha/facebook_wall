@@ -25,7 +25,6 @@ root.configure(background=MAIN_BG)
 root.resizable(width=False, height=False)
 root.minsize(width=500, height=500)
 
-
 menu = tk.Frame(root, bg=MAIN_BG)
 body = tk.Frame(root, bg=MAIN_BG)
 
