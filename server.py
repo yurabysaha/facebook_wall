@@ -37,7 +37,7 @@ class myHandler(BaseHTTPRequestHandler):
 
         if self.path == '/gettoken':
             graph = facebook
-            perms = ['user_friends', 'user_status', 'user_about_me']
+            perms = ['publish_actions', 'user_managed_groups', 'user_groups']
             fb_login_url = graph.auth_url(APP_ID, REDIRECT_URL, perms)
             get = webbrowser.open(fb_login_url)
 
