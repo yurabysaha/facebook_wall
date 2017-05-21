@@ -18,7 +18,7 @@ class myHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if '?code' in self.path:
             graph = facebook
-            z = graph.GraphAPI(version='2.9')
+            z = graph.GraphAPI(version='2.3')
             code = self.path.split('=')[1]
             r = z.get_access_token_from_code(code=code, app_id=APP_ID, redirect_uri=REDIRECT_URL, app_secret=APP_SECRET)
 
@@ -34,12 +34,6 @@ class myHandler(BaseHTTPRequestHandler):
             # extended_token = graph.extend_access_token(APP_ID, APP_SECRET)
             # print extended_token
             return
-
-        if self.path == '/gettoken':
-            graph = facebook
-            perms = ['publish_actions', 'user_managed_groups', 'user_groups']
-            fb_login_url = graph.auth_url(APP_ID, REDIRECT_URL, perms)
-            get = webbrowser.open(fb_login_url)
 
 
 class Server:

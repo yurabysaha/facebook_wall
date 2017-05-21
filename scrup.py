@@ -4,6 +4,8 @@ import facebook
 import requests
 import sqlite3 as db
 
+from selenium import webdriver
+
 from db_module import add_new_posts
 
 
@@ -20,10 +22,10 @@ class Scrup:
             return False
 
     def getAllPostsFromGroup(self, token, group_url):
-        self.graph = facebook.GraphAPI(access_token=token, version='2.3')
+        self.graph = facebook.GraphAPI(access_token=token, version="2.3")
         self.my_profile = self.graph.get_object('me')
         user_id = self.my_profile['id']
-        user_name = self.my_profile['first_name'] + ' ' + self.my_profile['last_name']
+        user_name = self.my_profile['name']
         # Get ID from group Url
         get_group_name = group_url.rstrip('/ ').split('/')[-1]
         if self._is_number(get_group_name):
@@ -100,9 +102,29 @@ class Scrup:
 
         for i in cur.execute("SELECT * FROM groups WHERE scrup=1;"):
             token = ''
-            for z in users:
-                if i[2] == z[2]:
-                    token = z[3]
+            for u in users:
+                if i[2] == u[2]:
+                    token = self.get_token(u[5], u[6])
                     break
             t = threading.Thread(target=self.getAllPostsFromGroup, args=(token, i[1],))
             t.start()
+
+    def get_token(self, login, password):
+        chrome_options = webdriver.ChromeOptions()
+        prefs = {"profile.default_content_setting_values.notifications": 2}
+        chrome_options.add_experimental_option("prefs", prefs)
+        chrome_options.add_argument('--lang=en')
+        chrome_options.add_argument("start-maximized")
+        self.chrome = webdriver.Chrome(executable_path='../chromedriver.exe', chrome_options=chrome_options)
+        # self.chrome = webdriver.Chrome(executable_path='../chromedriver'.format(os.getcwd()),
+        #                                chrome_options=chrome_options)
+        self.chrome.get(
+            'https://www.facebook.com/login/?next=https%3A%2F%2Fdevelopers.facebook.com%2Ftools%2Fexplorer%2F145634995501895%2F')
+        self.chrome.find_element_by_id('email').send_keys(login)
+        self.chrome.find_element_by_id('pass').send_keys(password)
+        self.chrome.find_element_by_id('pass').submit()
+        self.chrome.get(
+            'https://developers.facebook.com/tools/explorer/145634995501895/?method=GET&path=me%3F&version=v2.3')
+        token = self.chrome.find_element_by_xpath('//div/div[2]/div/div[1]/label/input').get_attribute('value')
+        self.chrome.close()
+        return token

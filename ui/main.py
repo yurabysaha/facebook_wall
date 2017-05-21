@@ -142,6 +142,6 @@ if __name__ == "__main__":
     menu.place(x=0, y=0, width=120, height=500)
     body.place(x=120, y=0, width=380, height=500)
     Menu()
-    t = threading.Thread(target=server.Server)
-    t.start()
+    # t = threading.Thread(target=server.Server)
+    # t.start()
     root.mainloop()

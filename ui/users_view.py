@@ -4,6 +4,10 @@ import webbrowser
 import facebook
 import sqlite3 as db
 
+from selenium import webdriver
+
+from db_module import add_new_user
+
 PORT_NUMBER = 8000
 APP_ID = 222805424880776
 APP_SECRET = '36f97d6ee25af24899a40b3124b5ff9f'
@@ -35,6 +39,13 @@ class UsersView:
         canvas.create_window((10, 10), window=self.listFrame, anchor='w')
         canvas.pack()
 
+        tk.Label(self.listFrame, text='Login', bg='#e6e6e6', fg='#2c2d30').place(x=0, y=5)
+        tk.Label(self.listFrame, text='Password', bg='#e6e6e6', fg='#2c2d30').place(x=0, y=25)
+        self.login = tk.Entry(self.listFrame, width=26)
+        self.login.place(x=60, y=5)
+        self.passw = tk.Entry(self.listFrame, width=26)
+        self.passw.place(x=60, y=25)
+
         self.update_mess_btn = tk.Button(self.listFrame,
                                          text='Add Facebook profile',
                                          fg='#ffffff',
@@ -44,7 +55,7 @@ class UsersView:
                                          width=18, height=2)
 
         self.update_mess_btn.bind("<Button-1>", self.add_new_fb_user)
-        self.update_mess_btn.place(x=110, y=5)
+        self.update_mess_btn.place(x=230, y=5)
 
         tk.Label(self.listFrame, text='Facebook id', bg='#e6e6e6', fg='#2c2d30').place(x=10, y=50)
         tk.Label(self.listFrame, text='User Name', bg='#e6e6e6', fg='#2c2d30').place(x=140, y=50)
@@ -71,10 +82,30 @@ class UsersView:
             self.id += 30
 
     def add_new_fb_user(self, event):
-            graph = facebook
-            perms = ['user_friends', 'user_status', 'user_about_me']
-            fb_login_url = graph.auth_url(APP_ID, REDIRECT_URL, perms)
-            get = webbrowser.open(fb_login_url)
+            # graph = facebook
+            # perms = ['publish_actions', 'user_managed_groups', 'user_groups']
+            # fb_login_url = graph.auth_url(APP_ID, REDIRECT_URL, perms)
+            # get = webbrowser.open(fb_login_url)
+
+            chrome_options = webdriver.ChromeOptions()
+            prefs = {"profile.default_content_setting_values.notifications": 2}
+            chrome_options.add_experimental_option("prefs", prefs)
+            chrome_options.add_argument('--lang=en')
+            chrome_options.add_argument("start-maximized")
+            self.chrome = webdriver.Chrome(executable_path='../chromedriver.exe', chrome_options=chrome_options)
+            # self.chrome = webdriver.Chrome(executable_path='../chromedriver'.format(os.getcwd()),
+            #                                chrome_options=chrome_options)
+            self.chrome.get('https://www.facebook.com/login/?next=https%3A%2F%2Fdevelopers.facebook.com%2Ftools%2Fexplorer%2F145634995501895%2F')
+            self.chrome.find_element_by_id('email').send_keys(self.login.get())
+            self.chrome.find_element_by_id('pass').send_keys(self.passw.get())
+            self.chrome.find_element_by_id('pass').submit()
+            self.chrome.get('https://developers.facebook.com/tools/explorer/145634995501895/?method=GET&path=me%3F&version=v2.3')
+            token = self.chrome.find_element_by_xpath('//div/div[2]/div/div[1]/label/input').get_attribute('value')
+            self.chrome.close()
+            graph = facebook.GraphAPI(access_token=token, version='2.3')
+            w = graph.get_object('me')
+            add_new_user(token, w, self.login.get(), self.passw.get())
+            UsersView(self.root, self.frames, self.text)
 
     def change_fetch(self, event, user):
         con = db.connect(database="../db")

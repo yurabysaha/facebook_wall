@@ -9,7 +9,9 @@ try:
             fb_id VARCHAR,
             name VARCHAR,
             token TEXT,
-            scrup_all BOOLEAN DEFAULT 0 
+            scrup_all BOOLEAN DEFAULT 0,
+            fb_login VARCHAR,
+            fb_password VARCHAR
             );
     """)
 except db.DatabaseError, x:
@@ -61,12 +63,12 @@ except db.DatabaseError, x:
     print "DB Error: ", x
 c.commit()
 c.close()
-#-----------------------------
-def add_new_user(token, fb_data):
+# -----------------------------
+def add_new_user(token, fb_data, fb_login, fb_password):
     con = db.connect(database="../db")
     cur = con.cursor()
-    query = "INSERT INTO users (fb_id, name, token) values (?, ?, ?)"
-    cur.execute(query, (fb_data['id'], fb_data['name'], token, ))
+    query = "INSERT INTO users (fb_id, name, token, fb_login, fb_password) values (?, ?, ?, ?, ?)"
+    cur.execute(query, (fb_data['id'], fb_data['name'], token, fb_login, fb_password,))
     con.commit()
     con.close()
 
