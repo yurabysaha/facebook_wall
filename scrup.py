@@ -3,7 +3,9 @@ import threading
 import facebook
 import requests
 import sqlite3 as db
+
 from db_module import add_new_posts
+
 
 class Scrup:
 
@@ -73,12 +75,12 @@ class Scrup:
                         post['source'] = ''
                         pass
                     try:
-                        print ('Source: :  ' + post['id'])
+                        print ('Post id:  ' + post['id'])
                     except:
-                        post['source'] = ''
+                        post['id'] = ''
                         pass
                     try:
-                        print ('Source: :  ' + post['story'])
+                        print ('Story: ' + post['story'])
                     except:
                         post['story'] = ''
                         pass
